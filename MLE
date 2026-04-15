@@ -1,107 +1,193 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Site Web</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-
-        header {
-            background: #007BFF;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-        }
-
-        nav ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-        }
-
-        main {
-            padding: 20px;
-        }
-
-        section {
-            margin-bottom: 20px;
-            padding: 20px;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        footer {
-            text-align: center;
-            padding: 10px;
-            background: #007BFF;
-            color: white;
-            position: relative;
-            bottom: 0;
-            width: 100%;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            nav ul li {
-                display: block;
-                margin: 10px 0;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Mission Locale</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      font-size: 20px;
+      text-align: center;
+    }
+    .question {
+      margin-bottom: 20px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 5px;
+      background: #007BFF;
+      color: white;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Bienvenue sur mon site web !</h1>
-        <nav>
-            <ul>
-                <li><a href="#home">Accueil</a></li>
-                <li><a href="#about">À propos</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
+  <div class="container">
+    <h1>Quel dispositif est fait pour toi ?</h1>
+    <div id="quiz"></div>
+    <div id="result" class="result"></div>
+  </div>
 
-    <main>
-        <section id="home">
-            <h2>Accueil</h2>
-            <p>Ceci est ma première page hébergée sur GitHub.</p>
-        </section>
+  <script>
+    const quizData = [
+      {
+        question: "Que fais-tu actuellement ?",
+        answers: [
+          { text: "Rien", type: "psad" },
+          { text: "Je cherche un emploi", type: "emploi" },
+          { text: "J'ai beaucoup de difficultés", type: "difficulte" }
+        ]
+      },
+      {
+        question: "As-tu un projet professionnel ?",
+        answers: [
+          { text: "Oui", type: "emploi" },
+          { text: "Non", type: "psad" }
+        ]
+      },
+      {
+        question: "As-tu un logement stable ?",
+        answers: [
+          { text: "Oui", type: "none" },
+          { text: "Non", type: "logement" }
+        ]
+      },
+      {
+        question: "As-tu des difficultés financières ?",
+        answers: [
+          { text: "Oui", type: "argent" },
+          { text: "Non", type: "none" }
+        ]
+      },
+      {
+        question: "Veux-tu créer ton activité ?",
+        answers: [
+          { text: "Oui", type: "createur" },
+          { text: "Non", type: "none" }
+        ]
+      },
+      {
+        question: "As-tu des difficultés avec le français ?",
+        answers: [
+          { text: "Oui", type: "kabar" },
+          { text: "Non", type: "none" }
+        ]
+      },
+      {
+        question: "As-tu besoin d'aide pour ta santé ou ton moral ?",
+        answers: [
+          { text: "Oui", type: "sante" },
+          { text: "Non", type: "none" }
+        ]
+      }
+    ];
 
-        <section id="about">
-            <h2>À propos</h2>
-            <p>Voici quelques informations sur moi et mon projet.</p>
-        </section>
+    let currentQuestion = 0;
+    let scores = {
+      psad: 0,
+      emploi: 0,
+      difficulte: 0,
+      logement: 0,
+      argent: 0,
+      createur: 0,
+      kabar: 0,
+      sante: 0
+    };
 
-        <section id="contact">
-            <h2>Contact</h2>
-            <p>Vous pouvez me contacter à l'adresse suivante : <a href="mailto:adresse@example.com">adresse@example.com</a></p>
-        </section>
-    </main>
+    function showQuestion() {
+      const quiz = document.getElementById("quiz");
+      quiz.innerHTML = "";
 
-    <footer>
-        <p>© 2026 Mon Site Web. Tous droits réservés.</p>
-    </footer>
+      if (currentQuestion >= quizData.length) {
+        showResult();
+        return;
+      }
+
+      const q = quizData[currentQuestion];
+      const questionEl = document.createElement("div");
+      questionEl.classList.add("question");
+      questionEl.innerHTML = `<p>${q.question}</p>`;
+
+      q.answers.forEach(answer => {
+        const btn = document.createElement("button");
+        btn.innerText = answer.text;
+        btn.onclick = () => {
+          if (answer.type !== "none") {
+            scores[answer.type]++;
+          }
+          currentQuestion++;
+          showQuestion();
+        };
+        questionEl.appendChild(btn);
+      });
+
+      quiz.appendChild(questionEl);
+    }
+
+    function showResult() {
+      const result = document.getElementById("result");
+
+      let maxType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+
+      let message = "";
+
+      switch(maxType) {
+        case "psad":
+          message = "Dispositif conseillé : PSAD (remise en parcours)";
+          break;
+        case "emploi":
+          message = "Dispositif conseillé : Accompagnement vers l'emploi";
+          break;
+        case "difficulte":
+          message = "Dispositif conseillé : TAPAJ / BIP / Maison Relais";
+          break;
+        case "logement":
+          message = "Dispositif conseillé : Jeunes et Logés / ALT";
+          break;
+        case "argent":
+          message = "Dispositif conseillé : FDAJ / FUI";
+          break;
+        case "createur":
+          message = "Dispositif conseillé : Groupement de créateurs";
+          break;
+        case "kabar":
+          message = "Dispositif conseillé : Kabar M'Parano Jeunes";
+          break;
+        case "sante":
+          message = "Dispositif conseillé : Accompagnement santé";
+          break;
+      }
+
+      document.getElementById("quiz").innerHTML = "";
+      result.innerText = message;
+    }
+
+    showQuestion();
+  </script>
 </body>
 </html>
