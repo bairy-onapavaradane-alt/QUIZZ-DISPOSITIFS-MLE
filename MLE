@@ -6,7 +6,7 @@
   <title>Quiz Mission Locale</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, Arial, sans-serif;
       margin: 0;
       padding: 20px;
       background: #f2f2f2;
@@ -16,8 +16,8 @@
       margin: auto;
       background: white;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     h1 {
       font-size: 20px;
@@ -28,21 +28,23 @@
     }
     button {
       width: 100%;
-      padding: 10px;
-      margin: 5px 0;
+      padding: 14px;
+      margin: 6px 0;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       background: #007BFF;
       color: white;
       font-size: 16px;
+      cursor: pointer;
     }
-    button:hover {
+    button:active {
       background: #0056b3;
     }
     .result {
       text-align: center;
       font-size: 18px;
       font-weight: bold;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -129,62 +131,61 @@
       }
 
       const q = quizData[currentQuestion];
-      const questionEl = document.createElement("div");
-      questionEl.classList.add("question");
-      questionEl.innerHTML = `<p>${q.question}</p>`;
+
+      const title = document.createElement("p");
+      title.textContent = q.question;
+      quiz.appendChild(title);
 
       q.answers.forEach(answer => {
         const btn = document.createElement("button");
-        btn.innerText = answer.text;
-        btn.onclick = () => {
+        btn.textContent = answer.text;
+
+        btn.addEventListener("click", function() {
           if (answer.type !== "none") {
             scores[answer.type]++;
           }
           currentQuestion++;
           showQuestion();
-        };
-        questionEl.appendChild(btn);
-      });
+        });
 
-      quiz.appendChild(questionEl);
+        quiz.appendChild(btn);
+      });
     }
 
     function showResult() {
-      const result = document.getElementById("result");
-
       let maxType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
 
       let message = "";
 
       switch(maxType) {
         case "psad":
-          message = "Dispositif conseillé : PSAD (remise en parcours)";
+          message = "👉 Dispositif conseillé : PSAD (remise en parcours)";
           break;
         case "emploi":
-          message = "Dispositif conseillé : Accompagnement vers l'emploi";
+          message = "👉 Dispositif conseillé : Accompagnement vers l'emploi";
           break;
         case "difficulte":
-          message = "Dispositif conseillé : TAPAJ / BIP / Maison Relais";
+          message = "👉 Dispositif conseillé : TAPAJ / BIP / Maison Relais";
           break;
         case "logement":
-          message = "Dispositif conseillé : Jeunes et Logés / ALT";
+          message = "👉 Dispositif conseillé : Jeunes et Logés / ALT";
           break;
         case "argent":
-          message = "Dispositif conseillé : FDAJ / FUI";
+          message = "👉 Dispositif conseillé : FDAJ / FUI";
           break;
         case "createur":
-          message = "Dispositif conseillé : Groupement de créateurs";
+          message = "👉 Dispositif conseillé : Groupement de créateurs";
           break;
         case "kabar":
-          message = "Dispositif conseillé : Kabar M'Parano Jeunes";
+          message = "👉 Dispositif conseillé : Kabar M'Parano Jeunes";
           break;
         case "sante":
-          message = "Dispositif conseillé : Accompagnement santé";
+          message = "👉 Dispositif conseillé : Accompagnement santé";
           break;
       }
 
       document.getElementById("quiz").innerHTML = "";
-      result.innerText = message;
+      document.getElementById("result").textContent = message;
     }
 
     showQuestion();
