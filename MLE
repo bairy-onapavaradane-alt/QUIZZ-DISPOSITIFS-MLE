@@ -6,13 +6,23 @@
 <title>Quiz Mission Locale</title>
 <style>
 body { font-family: Arial; background:#f2f2f2; padding:20px; }
-.container { max-width:500px; margin:auto; background:white; padding:20px; border-radius:10px; }
-button { display:block; width:100%; padding:12px; margin:8px 0; background:#007BFF; color:white; border:none; border-radius:6px; font-size:16px; }
+.container { max-width:500px; margin:auto; background:white; padding:20px; border-radius:12px; text-align:center; }
+button { display:block; width:100%; padding:14px; margin:8px 0; border:none; border-radius:8px; font-size:16px; color:white; }
+.start { background:#28a745; }
+.red { background:#e74c3c; }
+.blue { background:#3498db; }
+.green { background:#2ecc71; }
+.yellow { background:#f1c40f; color:black; }
 </style>
 </head>
 <body>
 <div class="container">
-<h2>Quel dispositif est fait pour toi ?</h2>
+<h2>🎯 Quel dispositif est fait pour toi ?</h2>
+<div id="startScreen">
+<p>Clique pour commencer le quiz</p>
+<button class="start" onclick="startQuiz()">Commencer</button>
+</div>
+
 <p id="question"></p>
 <div id="answers"></div>
 <p id="result"></p>
@@ -21,46 +31,68 @@ button { display:block; width:100%; padding:12px; margin:8px 0; background:#007B
 <script>
 var quiz = [
   {q:"Que fais-tu actuellement ?", a:[
-    {t:"Rien", v:"psad"},
-    {t:"Je cherche un emploi", v:"emploi"},
-    {t:"J'ai des difficultés", v:"difficulte"}
+    {t:"Rien", v:"psad", c:"red"},
+    {t:"Je cherche un emploi", v:"emploi", c:"blue"},
+    {t:"J'ai des difficultés", v:"difficulte", c:"green"}
   ]},
   {q:"As-tu un projet professionnel ?", a:[
-    {t:"Oui", v:"emploi"},
-    {t:"Non", v:"psad"}
+    {t:"Oui", v:"emploi", c:"blue"},
+    {t:"Non", v:"psad", c:"red"}
   ]},
   {q:"As-tu un logement stable ?", a:[
-    {t:"Oui", v:"none"},
-    {t:"Non", v:"logement"}
+    {t:"Oui", v:"none", c:"green"},
+    {t:"Non", v:"logement", c:"yellow"}
   ]},
   {q:"As-tu des difficultés financières ?", a:[
-    {t:"Oui", v:"argent"},
-    {t:"Non", v:"none"}
+    {t:"Oui", v:"argent", c:"yellow"},
+    {t:"Non", v:"none", c:"green"}
+  ]},
+  {q:"Veux-tu créer ton activité ?", a:[
+    {t:"Oui", v:"createur", c:"blue"},
+    {t:"Non", v:"none", c:"green"}
+  ]},
+  {q:"As-tu des difficultés avec le français ?", a:[
+    {t:"Oui", v:"kabar", c:"red"},
+    {t:"Non", v:"none", c:"green"}
+  ]},
+  {q:"As-tu besoin d'aide pour ta santé ou ton moral ?", a:[
+    {t:"Oui", v:"sante", c:"yellow"},
+    {t:"Non", v:"none", c:"green"}
   ]}
 ];
 
 var i=0;
-var score={psad:0, emploi:0, difficulte:0, logement:0, argent:0};
+var score={psad:0, emploi:0, difficulte:0, logement:0, argent:0, createur:0, kabar:0, sante:0};
+
+function startQuiz(){
+  document.getElementById("startScreen").style.display="none";
+  show();
+}
 
 function show(){
   if(i>=quiz.length){
     var max="psad";
     for(var k in score){ if(score[k]>score[max]) max=k; }
     var res="";
-    if(max=="psad") res="PSAD";
+    if(max=="psad") res="PSAD (remise en parcours)";
     if(max=="emploi") res="Accompagnement vers l'emploi";
-    if(max=="difficulte") res="TAPAJ / BIP";
-    if(max=="logement") res="Jeunes et Logés";
+    if(max=="difficulte") res="TAPAJ / BIP / Maison Relais";
+    if(max=="logement") res="Jeunes et Logés / ALT";
     if(max=="argent") res="FDAJ / FUI";
-    document.getElementById("question").innerHTML="Résultat : "+res;
-    document.getElementById("answers").innerHTML="";
+    if(max=="createur") res="Groupement de créateurs";
+    if(max=="kabar") res="Kabar M'Parano Jeunes";
+    if(max=="sante") res="Accompagnement santé";
+
+    document.getElementById("question").innerHTML="🎉 Ton résultat :";
+    document.getElementById("answers").innerHTML="<b>"+res+"</b>";
     return;
   }
 
   document.getElementById("question").innerHTML=quiz[i].q;
   var div="";
   for(var j=0;j<quiz[i].a.length;j++){
-    div += '<button onclick="next(\''+quiz[i].a[j].v+'\')">'+quiz[i].a[j].t+'</button>';
+    var rep=quiz[i].a[j];
+    div += '<button class="'+rep.c+'" onclick="next(\''+rep.v+'\')">'+rep.t+'</button>';
   }
   document.getElementById("answers").innerHTML=div;
 }
@@ -70,15 +102,6 @@ function next(val){
   i++;
   show();
 }
-
-show();
 </script>
-</body>
-</html>
-      document.getElementById("result").textContent = message;
-    }
-
-    showQuestion();
-  </script>
 </body>
 </html>
