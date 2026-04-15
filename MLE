@@ -1,190 +1,80 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz Mission Locale</title>
-  <style>
-    body {
-      font-family: -apple-system, Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #f2f2f2;
-    }
-    .container {
-      max-width: 500px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      font-size: 20px;
-      text-align: center;
-    }
-    .question {
-      margin-bottom: 20px;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      margin: 6px 0;
-      border: none;
-      border-radius: 8px;
-      background: #007BFF;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:active {
-      background: #0056b3;
-    }
-    .result {
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Mission Locale</title>
+<style>
+body { font-family: Arial; background:#f2f2f2; padding:20px; }
+.container { max-width:500px; margin:auto; background:white; padding:20px; border-radius:10px; }
+button { display:block; width:100%; padding:12px; margin:8px 0; background:#007BFF; color:white; border:none; border-radius:6px; font-size:16px; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Quel dispositif est fait pour toi ?</h1>
-    <div id="quiz"></div>
-    <div id="result" class="result"></div>
-  </div>
+<div class="container">
+<h2>Quel dispositif est fait pour toi ?</h2>
+<p id="question"></p>
+<div id="answers"></div>
+<p id="result"></p>
+</div>
 
-  <script>
-    const quizData = [
-      {
-        question: "Que fais-tu actuellement ?",
-        answers: [
-          { text: "Rien", type: "psad" },
-          { text: "Je cherche un emploi", type: "emploi" },
-          { text: "J'ai beaucoup de difficultés", type: "difficulte" }
-        ]
-      },
-      {
-        question: "As-tu un projet professionnel ?",
-        answers: [
-          { text: "Oui", type: "emploi" },
-          { text: "Non", type: "psad" }
-        ]
-      },
-      {
-        question: "As-tu un logement stable ?",
-        answers: [
-          { text: "Oui", type: "none" },
-          { text: "Non", type: "logement" }
-        ]
-      },
-      {
-        question: "As-tu des difficultés financières ?",
-        answers: [
-          { text: "Oui", type: "argent" },
-          { text: "Non", type: "none" }
-        ]
-      },
-      {
-        question: "Veux-tu créer ton activité ?",
-        answers: [
-          { text: "Oui", type: "createur" },
-          { text: "Non", type: "none" }
-        ]
-      },
-      {
-        question: "As-tu des difficultés avec le français ?",
-        answers: [
-          { text: "Oui", type: "kabar" },
-          { text: "Non", type: "none" }
-        ]
-      },
-      {
-        question: "As-tu besoin d'aide pour ta santé ou ton moral ?",
-        answers: [
-          { text: "Oui", type: "sante" },
-          { text: "Non", type: "none" }
-        ]
-      }
-    ];
+<script>
+var quiz = [
+  {q:"Que fais-tu actuellement ?", a:[
+    {t:"Rien", v:"psad"},
+    {t:"Je cherche un emploi", v:"emploi"},
+    {t:"J'ai des difficultés", v:"difficulte"}
+  ]},
+  {q:"As-tu un projet professionnel ?", a:[
+    {t:"Oui", v:"emploi"},
+    {t:"Non", v:"psad"}
+  ]},
+  {q:"As-tu un logement stable ?", a:[
+    {t:"Oui", v:"none"},
+    {t:"Non", v:"logement"}
+  ]},
+  {q:"As-tu des difficultés financières ?", a:[
+    {t:"Oui", v:"argent"},
+    {t:"Non", v:"none"}
+  ]}
+];
 
-    let currentQuestion = 0;
-    let scores = {
-      psad: 0,
-      emploi: 0,
-      difficulte: 0,
-      logement: 0,
-      argent: 0,
-      createur: 0,
-      kabar: 0,
-      sante: 0
-    };
+var i=0;
+var score={psad:0, emploi:0, difficulte:0, logement:0, argent:0};
 
-    function showQuestion() {
-      const quiz = document.getElementById("quiz");
-      quiz.innerHTML = "";
+function show(){
+  if(i>=quiz.length){
+    var max="psad";
+    for(var k in score){ if(score[k]>score[max]) max=k; }
+    var res="";
+    if(max=="psad") res="PSAD";
+    if(max=="emploi") res="Accompagnement vers l'emploi";
+    if(max=="difficulte") res="TAPAJ / BIP";
+    if(max=="logement") res="Jeunes et Logés";
+    if(max=="argent") res="FDAJ / FUI";
+    document.getElementById("question").innerHTML="Résultat : "+res;
+    document.getElementById("answers").innerHTML="";
+    return;
+  }
 
-      if (currentQuestion >= quizData.length) {
-        showResult();
-        return;
-      }
+  document.getElementById("question").innerHTML=quiz[i].q;
+  var div="";
+  for(var j=0;j<quiz[i].a.length;j++){
+    div += '<button onclick="next(\''+quiz[i].a[j].v+'\')">'+quiz[i].a[j].t+'</button>';
+  }
+  document.getElementById("answers").innerHTML=div;
+}
 
-      const q = quizData[currentQuestion];
+function next(val){
+  if(val!="none") score[val]++;
+  i++;
+  show();
+}
 
-      const title = document.createElement("p");
-      title.textContent = q.question;
-      quiz.appendChild(title);
-
-      q.answers.forEach(answer => {
-        const btn = document.createElement("button");
-        btn.textContent = answer.text;
-
-        btn.addEventListener("click", function() {
-          if (answer.type !== "none") {
-            scores[answer.type]++;
-          }
-          currentQuestion++;
-          showQuestion();
-        });
-
-        quiz.appendChild(btn);
-      });
-    }
-
-    function showResult() {
-      let maxType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
-
-      let message = "";
-
-      switch(maxType) {
-        case "psad":
-          message = "👉 Dispositif conseillé : PSAD (remise en parcours)";
-          break;
-        case "emploi":
-          message = "👉 Dispositif conseillé : Accompagnement vers l'emploi";
-          break;
-        case "difficulte":
-          message = "👉 Dispositif conseillé : TAPAJ / BIP / Maison Relais";
-          break;
-        case "logement":
-          message = "👉 Dispositif conseillé : Jeunes et Logés / ALT";
-          break;
-        case "argent":
-          message = "👉 Dispositif conseillé : FDAJ / FUI";
-          break;
-        case "createur":
-          message = "👉 Dispositif conseillé : Groupement de créateurs";
-          break;
-        case "kabar":
-          message = "👉 Dispositif conseillé : Kabar M'Parano Jeunes";
-          break;
-        case "sante":
-          message = "👉 Dispositif conseillé : Accompagnement santé";
-          break;
-      }
-
-      document.getElementById("quiz").innerHTML = "";
+show();
+</script>
+</body>
+</html>
       document.getElementById("result").textContent = message;
     }
 
