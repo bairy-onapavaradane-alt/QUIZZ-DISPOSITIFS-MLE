@@ -20,7 +20,7 @@ button { display:block; width:100%; padding:14px; margin:8px 0; border:none; bor
 <h2>🎯 Quel dispositif est fait pour toi ?</h2>
 <div id="startScreen">
 <p>Clique pour commencer le quiz</p>
-<button class="start" onclick="startQuiz()">Commencer</button>
+<button class="start" id="startBtn">Commencer</button>
 </div>
 
 <p id="question"></p>
@@ -29,6 +29,8 @@ button { display:block; width:100%; padding:14px; margin:8px 0; border:none; bor
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function(){
+
 var quiz = [
   {q:"Que fais-tu actuellement ?", a:[
     {t:"Rien", v:"psad", c:"red"},
@@ -46,62 +48,56 @@ var quiz = [
   {q:"As-tu des difficultés financières ?", a:[
     {t:"Oui", v:"argent", c:"yellow"},
     {t:"Non", v:"none", c:"green"}
-  ]},
-  {q:"Veux-tu créer ton activité ?", a:[
-    {t:"Oui", v:"createur", c:"blue"},
-    {t:"Non", v:"none", c:"green"}
-  ]},
-  {q:"As-tu des difficultés avec le français ?", a:[
-    {t:"Oui", v:"kabar", c:"red"},
-    {t:"Non", v:"none", c:"green"}
-  ]},
-  {q:"As-tu besoin d'aide pour ta santé ou ton moral ?", a:[
-    {t:"Oui", v:"sante", c:"yellow"},
-    {t:"Non", v:"none", c:"green"}
   ]}
 ];
 
-var i=0;
-var score={psad:0, emploi:0, difficulte:0, logement:0, argent:0, createur:0, kabar:0, sante:0};
+var i = 0;
+var score = {psad:0, emploi:0, difficulte:0, logement:0, argent:0};
 
-function startQuiz(){
-  document.getElementById("startScreen").style.display="none";
+var startBtn = document.getElementById("startBtn");
+var startScreen = document.getElementById("startScreen");
+var questionEl = document.getElementById("question");
+var answersEl = document.getElementById("answers");
+
+startBtn.addEventListener("click", function(){
+  startScreen.style.display = "none";
   show();
-}
+});
 
 function show(){
-  if(i>=quiz.length){
-    var max="psad";
-    for(var k in score){ if(score[k]>score[max]) max=k; }
-    var res="";
-    if(max=="psad") res="PSAD (remise en parcours)";
-    if(max=="emploi") res="Accompagnement vers l'emploi";
-    if(max=="difficulte") res="TAPAJ / BIP / Maison Relais";
-    if(max=="logement") res="Jeunes et Logés / ALT";
-    if(max=="argent") res="FDAJ / FUI";
-    if(max=="createur") res="Groupement de créateurs";
-    if(max=="kabar") res="Kabar M'Parano Jeunes";
-    if(max=="sante") res="Accompagnement santé";
+  if(i >= quiz.length){
+    var max = "psad";
+    for(var k in score){ if(score[k] > score[max]) max = k; }
 
-    document.getElementById("question").innerHTML="🎉 Ton résultat :";
-    document.getElementById("answers").innerHTML="<b>"+res+"</b>";
+    var res = "";
+    if(max == "psad") res = "PSAD (remise en parcours)";
+    if(max == "emploi") res = "Accompagnement vers l'emploi";
+    if(max == "difficulte") res = "TAPAJ / BIP";
+    if(max == "logement") res = "Jeunes et Logés";
+    if(max == "argent") res = "FDAJ / FUI";
+
+    questionEl.innerHTML = "🎉 Ton résultat :";
+    answersEl.innerHTML = "<b>" + res + "</b>";
     return;
   }
 
-  document.getElementById("question").innerHTML=quiz[i].q;
-  var div="";
-  for(var j=0;j<quiz[i].a.length;j++){
-    var rep=quiz[i].a[j];
-    div += '<button class="'+rep.c+'" onclick="next(\''+rep.v+'\')">'+rep.t+'</button>';
-  }
-  document.getElementById("answers").innerHTML=div;
+  questionEl.innerHTML = quiz[i].q;
+  answersEl.innerHTML = "";
+
+  quiz[i].a.forEach(function(rep){
+    var btn = document.createElement("button");
+    btn.textContent = rep.t;
+    btn.className = rep.c;
+    btn.addEventListener("click", function(){
+      if(rep.v !== "none") score[rep.v]++;
+      i++;
+      show();
+    });
+    answersEl.appendChild(btn);
+  });
 }
 
-function next(val){
-  if(val!="none") score[val]++;
-  i++;
-  show();
-}
+});
 </script>
 </body>
 </html>
