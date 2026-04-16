@@ -1,103 +1,173 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz Mission Locale</title>
-<style>
-body { font-family: Arial; background:#f2f2f2; padding:20px; }
-.container { max-width:500px; margin:auto; background:white; padding:20px; border-radius:12px; text-align:center; }
-button { display:block; width:100%; padding:14px; margin:8px 0; border:none; border-radius:8px; font-size:16px; color:white; }
-.start { background:#28a745; }
-.red { background:#e74c3c; }
-.blue { background:#3498db; }
-.green { background:#2ecc71; }
-.yellow { background:#f1c40f; color:black; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orientation Mission Locale</title>
+    <style>
+        :root {
+            --primary: #0d47a1;
+            --accent: #ffca28;
+            --bg: #f4f7f6;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        
+        .container { 
+            max-width: 500px; width: 90%; background: white; 
+            padding: 30px; border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; 
+        }
+
+        h2 { color: var(--primary); margin-bottom: 20px; }
+        p { color: #555; line-height: 1.6; }
+
+        .btn { 
+            display: block; width: 100%; padding: 15px; margin: 10px 0; 
+            border: none; border-radius: 10px; font-size: 16px; font-weight: bold;
+            cursor: pointer; transition: transform 0.2s, filter 0.2s; color: white;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn:hover { filter: brightness(1.1); }
+
+        /* Couleurs des boutons */
+        .start { background: var(--primary); }
+        .option-btn { background: #3498db; }
+        .option-btn:nth-child(even) { background: #2ecc71; }
+        .option-btn:nth-child(3n) { background: #9b59b6; }
+
+        #question-section { display: none; }
+        #result-section { display: none; }
+
+        .dispositif-name {
+            display: block; font-size: 24px; color: #2ecc71; margin: 20px 0; font-weight: bold;
+        }
+        .desc { font-size: 14px; background: #e8f5e9; padding: 15px; border-radius: 10px; color: #2e7d32; }
+    </style>
 </head>
 <body>
-<div class="container">
-<h2>🎯 Quel dispositif est fait pour toi ?</h2>
-<div id="startScreen">
-<p>Clique pour commencer le quiz</p>
-<button class="start" id="startBtn">Commencer</button>
-</div>
 
-<p id="question"></p>
-<div id="answers"></div>
-<p id="result"></p>
+<div class="container">
+    <div id="start-section">
+        <h2>🎯 Quel dispositif est fait pour toi ?</h2>
+        <p>Réponds à 4 questions pour découvrir l'accompagnement qui correspond à ta situation actuelle.</p>
+        <button class="btn start" onclick="startQuiz()">Commencer le test</button>
+    </div>
+
+    <div id="question-section">
+        <h2 id="question-text">Question</h2>
+        <div id="answers-container"></div>
+    </div>
+
+    <div id="result-section">
+        <h2>🎉 Résultat</h2>
+        <p>Selon tes réponses, nous te conseillons :</p>
+        <span id="res-name" class="dispositif-name"></span>
+        <p id="res-desc" class="desc"></p>
+        <button class="btn start" onclick="location.reload()" style="margin-top:20px;">Recommencer</button>
+    </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function(){
-
-var quiz = [
-  {q:"Que fais-tu actuellement ?", a:[
-    {t:"Rien", v:"psad", c:"red"},
-    {t:"Je cherche un emploi", v:"emploi", c:"blue"},
-    {t:"J'ai des difficultés", v:"difficulte", c:"green"}
-  ]},
-  {q:"As-tu un projet professionnel ?", a:[
-    {t:"Oui", v:"emploi", c:"blue"},
-    {t:"Non", v:"psad", c:"red"}
-  ]},
-  {q:"As-tu un logement stable ?", a:[
-    {t:"Oui", v:"none", c:"green"},
-    {t:"Non", v:"logement", c:"yellow"}
-  ]},
-  {q:"As-tu des difficultés financières ?", a:[
-    {t:"Oui", v:"argent", c:"yellow"},
-    {t:"Non", v:"none", c:"green"}
-  ]}
+const quizData = [
+    {
+        q: "Quelle est ta situation actuelle ?",
+        a: [
+            { t: "Je ne fais rien (ni école, ni emploi)", v: "psad" },
+            { t: "Je cherche activement un travail", v: "emploi" },
+            { t: "Je rencontre de grosses difficultés sociales", v: "difficulte" }
+        ]
+    },
+    {
+        q: "As-tu une idée précise de ton futur métier ?",
+        a: [
+            { t: "Oui, mon projet est prêt", v: "emploi" },
+            { t: "Non, je suis un peu perdu(e)", v: "psad" }
+        ]
+    },
+    {
+        q: "Rencontres-tu des problèmes de logement ?",
+        a: [
+            { t: "Oui, c'est urgent", v: "logement" },
+            { t: "Non, je suis bien logé(e)", v: "none" }
+        ]
+    },
+    {
+        q: "As-tu besoin d'une aide financière rapide ?",
+        a: [
+            { t: "Oui, j'ai des difficultés d'argent", v: "argent" },
+            { t: "Non, ça va de ce côté là", v: "none" }
+        ]
+    }
 ];
 
-var i = 0;
-var score = {psad:0, emploi:0, difficulte:0, logement:0, argent:0};
+const descriptions = {
+    psad: "La PSAD (Plateforme de Suivi et d'Appui aux Décrocheurs) t'aide à reprendre un parcours scolaire ou une formation si tu as arrêté l'école sans solution.",
+    emploi: "L'Accompagnement Emploi (ou CEJ) est parfait pour toi. On va booster ton CV, tes lettres et te trouver des entretiens !",
+    difficulte: "Le dispositif TAPAJ ou BIP permet un accompagnement adapté pour reprendre un rythme à ton aise tout en gérant tes difficultés.",
+    logement: "Le service 'Jeunes et Logés' peut t'épauler pour trouver une solution d'hébergement ou t'aider dans tes démarches administratives.",
+    argent: "Tu pourrais être éligible au FDAJ (Fonds d'Aide aux Jeunes) pour t'aider ponctuellement à financer tes projets ou ton quotidien."
+};
 
-var startBtn = document.getElementById("startBtn");
-var startScreen = document.getElementById("startScreen");
-var questionEl = document.getElementById("question");
-var answersEl = document.getElementById("answers");
+let currentI = 0;
+let scores = { psad: 0, emploi: 0, difficulte: 0, logement: 0, argent: 0 };
 
-startBtn.addEventListener("click", function(){
-  startScreen.style.display = "none";
-  show();
-});
-
-function show(){
-  if(i >= quiz.length){
-    var max = "psad";
-    for(var k in score){ if(score[k] > score[max]) max = k; }
-
-    var res = "";
-    if(max == "psad") res = "PSAD (remise en parcours)";
-    if(max == "emploi") res = "Accompagnement vers l'emploi";
-    if(max == "difficulte") res = "TAPAJ / BIP";
-    if(max == "logement") res = "Jeunes et Logés";
-    if(max == "argent") res = "FDAJ / FUI";
-
-    questionEl.innerHTML = "🎉 Ton résultat :";
-    answersEl.innerHTML = "<b>" + res + "</b>";
-    return;
-  }
-
-  questionEl.innerHTML = quiz[i].q;
-  answersEl.innerHTML = "";
-
-  quiz[i].a.forEach(function(rep){
-    var btn = document.createElement("button");
-    btn.textContent = rep.t;
-    btn.className = rep.c;
-    btn.addEventListener("click", function(){
-      if(rep.v !== "none") score[rep.v]++;
-      i++;
-      show();
-    });
-    answersEl.appendChild(btn);
-  });
+function startQuiz() {
+    document.getElementById('start-section').style.display = 'none';
+    document.getElementById('question-section').style.display = 'block';
+    showQuestion();
 }
 
-});
+function showQuestion() {
+    if (currentI >= quizData.length) {
+        showResult();
+        return;
+    }
+
+    const currentQ = quizData[currentI];
+    document.getElementById('question-text').innerText = currentQ.q;
+    const container = document.getElementById('answers-container');
+    container.innerHTML = ""; // On vide les anciens boutons
+
+    currentQ.a.forEach(answer => {
+        const btn = document.createElement('button');
+        btn.innerText = answer.t;
+        btn.className = "btn option-btn";
+        btn.onclick = () => {
+            if (answer.v !== "none") scores[answer.v]++;
+            currentI++;
+            showQuestion();
+        };
+        container.appendChild(btn);
+    });
+}
+
+function showResult() {
+    document.getElementById('question-section').style.display = 'none';
+    document.getElementById('result-section').style.display = 'block';
+
+    // Trouver le score le plus élevé
+    let winner = "emploi"; // Par défaut
+    let maxScore = -1;
+
+    for (const key in scores) {
+        if (scores[key] > maxScore) {
+            maxScore = scores[key];
+            winner = key;
+        }
+    }
+
+    // Traduction des noms pour l'affichage
+    const names = {
+        psad: "PSAD (Remise en parcours)",
+        emploi: "Accompagnement vers l'Emploi",
+        difficulte: "Dispositif TAPAJ / BIP",
+        logement: "Aide au Logement",
+        argent: "Aide Financière (FDAJ)"
+    };
+
+    document.getElementById('res-name').innerText = names[winner];
+    document.getElementById('res-desc').innerText = descriptions[winner];
+}
 </script>
 </body>
 </html>
