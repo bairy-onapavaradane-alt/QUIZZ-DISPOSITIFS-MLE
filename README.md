@@ -7,85 +7,83 @@
 
 <style>
 body {
-  font-family: Arial;
-  background: linear-gradient(135deg, #74ebd5, #9face6);
-  padding: 20px;
-  margin: 0;
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background:#0f172a;
+  color:white;
 }
 
 .container {
-  max-width: 500px;
-  margin: auto;
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  max-width:420px;
+  margin:auto;
+  padding:20px;
 }
 
-h2 {
-  margin-bottom: 10px;
+.card {
+  background:#1e293b;
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
 
-#progress {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 10px;
+h2 { text-align:center; }
+
+.progress {
+  height:6px;
+  background:#334155;
+  border-radius:10px;
+  overflow:hidden;
+  margin:15px 0;
 }
 
-.bar {
-  height: 8px;
-  background: #eee;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-
-.bar-fill {
-  height: 100%;
-  width: 0%;
-  background: #3498db;
-  transition: width 0.3s;
+.progress-fill {
+  height:100%;
+  width:0%;
+  background:#38bdf8;
+  transition:0.3s;
 }
 
 button {
-  display: block;
-  width: 100%;
-  padding: 14px;
-  margin: 8px 0;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  color: white;
-  cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+  color:white;
+  transition:0.2s;
 }
 
-button:hover {
-  transform: scale(1.05);
-  opacity: 0.9;
+button:hover { transform:scale(1.04); }
+
+.red { background:#ef4444; }
+.blue { background:#3b82f6; }
+.green { background:#22c55e; }
+.yellow { background:#eab308; color:black; }
+
+.start { background:#22c55e; }
+
+.result {
+  text-align:center;
 }
 
-.start { background:#28a745; }
-.red { background:#e74c3c; }
-.blue { background:#3498db; }
-.green { background:#2ecc71; }
-.yellow { background:#f1c40f; color:black; }
+.result h3 {
+  font-size:24px;
+  margin-bottom:10px;
+}
+
+.badge {
+  font-size:40px;
+}
 
 .fade {
-  animation: fadeIn 0.4s ease;
+  animation:fade 0.4s;
 }
 
-@keyframes fadeIn {
-  from {opacity: 0; transform: translateY(10px);}
-  to {opacity: 1; transform: translateY(0);}
-}
-
-.result-box {
-  padding: 15px;
-  border-radius: 10px;
-  background: #f8f9fa;
-  margin-top: 15px;
+@keyframes fade {
+  from {opacity:0; transform:translateY(10px);}
+  to {opacity:1;}
 }
 </style>
 </head>
@@ -93,25 +91,27 @@ button:hover {
 <body>
 
 <div class="container">
+<div class="card">
 
-<h2>🎯 Quel dispositif est fait pour toi ?</h2>
+<h2>🎯 Ton orientation</h2>
 
-<div id="startScreen">
-<p>Clique pour commencer le quiz</p>
-<button class="start" id="startBtn">Commencer</button>
+<div id="start">
+<p>Commence le quiz</p>
+<button class="start" onclick="startQuiz()">Démarrer</button>
 </div>
 
-<p id="progress"></p>
-<div class="bar"><div class="bar-fill" id="barFill"></div></div>
+<div id="quiz" style="display:none;">
+<div class="progress"><div id="bar" class="progress-fill"></div></div>
+<p id="q"></p>
+<div id="a"></div>
+</div>
 
-<p id="question"></p>
-<div id="answers"></div>
 <div id="result"></div>
 
 </div>
+</div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function(){
 
 var quiz = [
   {q:"Que fais-tu actuellement ?", a:[
@@ -123,114 +123,92 @@ var quiz = [
     {t:"Oui", v:"emploi", c:"blue"},
     {t:"Non", v:"psad", c:"red"}
   ]},
-  {q:"As-tu un logement stable ?", a:[
+  {q:"Logement stable ?", a:[
     {t:"Oui", v:"none", c:"green"},
     {t:"Non", v:"logement", c:"yellow"}
   ]},
-  {q:"As-tu des difficultés financières ?", a:[
+  {q:"Difficultés financières ?", a:[
     {t:"Oui", v:"argent", c:"yellow"},
     {t:"Non", v:"none", c:"green"}
   ]}
 ];
 
 var i = 0;
-var score = {psad:0, emploi:0, difficulte:0, logement:0, argent:0};
+var score = JSON.parse(localStorage.getItem("score")) || {psad:0, emploi:0, difficulte:0, logement:0, argent:0};
 
-var startBtn = document.getElementById("startBtn");
-var startScreen = document.getElementById("startScreen");
-var questionEl = document.getElementById("question");
-var answersEl = document.getElementById("answers");
-var resultEl = document.getElementById("result");
-var progressEl = document.getElementById("progress");
-var barFill = document.getElementById("barFill");
-
-startBtn.addEventListener("click", function(){
-  startScreen.style.display = "none";
+function startQuiz(){
+  document.getElementById("start").style.display="none";
+  document.getElementById("quiz").style.display="block";
   show();
-});
-
-function updateProgress(){
-  progressEl.innerHTML = "Question " + (i+1) + " / " + quiz.length;
-  barFill.style.width = ((i)/quiz.length)*100 + "%";
 }
 
 function show(){
   if(i >= quiz.length){
-    showResult();
+    finish();
     return;
   }
 
-  updateProgress();
+  document.getElementById("bar").style.width = (i/quiz.length)*100 + "%";
 
-  questionEl.className = "fade";
-  questionEl.innerHTML = quiz[i].q;
-  answersEl.innerHTML = "";
+  var q = quiz[i];
+  document.getElementById("q").innerHTML = q.q;
+  var aDiv = document.getElementById("a");
+  aDiv.innerHTML="";
 
-  quiz[i].a.forEach(function(rep){
-    var btn = document.createElement("button");
-    btn.textContent = rep.t;
-    btn.className = rep.c + " fade";
+  q.a.forEach(rep=>{
+    var b = document.createElement("button");
+    b.textContent = rep.t;
+    b.className = rep.c + " fade";
 
-    btn.addEventListener("click", function(){
-      answersEl.innerHTML = "";
+    b.onclick = ()=>{
       if(rep.v !== "none") score[rep.v]++;
+      localStorage.setItem("score", JSON.stringify(score));
       i++;
-      setTimeout(show, 300);
-    });
+      show();
+    };
 
-    answersEl.appendChild(btn);
+    aDiv.appendChild(b);
   });
 }
 
-function showResult(){
+function finish(){
 
-  var max = null;
-  var maxValue = -1;
+  var max = Object.keys(score).reduce((a,b)=>score[a]>score[b]?a:b);
 
-  for(var k in score){
-    if(score[k] > maxValue){
-      maxValue = score[k];
-      max = k;
-    }
-  }
+  var data = {
+    psad:["🔄","PSAD","Remise en parcours"],
+    emploi:["💼","Emploi","Insertion pro"],
+    difficulte:["🧠","TAPAJ / BIP","Accompagnement renforcé"],
+    logement:["🏠","Logement","Accès logement"],
+    argent:["💰","Aides","Soutien financier"]
+  };
 
-  var res = "";
-  var desc = "";
+  var r = data[max];
 
-  if(max == "psad"){
-    res = "PSAD";
-    desc = "Remise en parcours, accompagnement pour repartir sur de bonnes bases.";
-  }
-  if(max == "emploi"){
-    res = "Accompagnement vers l'emploi";
-    desc = "Aide pour trouver un travail ou une formation.";
-  }
-  if(max == "difficulte"){
-    res = "TAPAJ / BIP";
-    desc = "Dispositifs pour jeunes en difficulté avec accompagnement renforcé.";
-  }
-  if(max == "logement"){
-    res = "Jeunes et Logés";
-    desc = "Aide pour accéder à un logement stable.";
-  }
-  if(max == "argent"){
-    res = "FDAJ / FUI";
-    desc = "Aides financières pour soutenir ton projet.";
-  }
+  document.getElementById("quiz").style.display="none";
 
-  questionEl.innerHTML = "🎉 Ton résultat :";
-  answersEl.innerHTML = "";
+  document.getElementById("result").innerHTML = `
+    <div class="result fade">
+      <div class="badge">${r[0]}</div>
+      <h3>${r[1]}</h3>
+      <p>${r[2]}</p>
 
-  resultEl.innerHTML = `
-    <div class="result-box fade">
-      <h3>${res}</h3>
-      <p>${desc}</p>
-      <button class="start" onclick="location.reload()">Recommencer</button>
+      <button class="start" onclick="restart()">Recommencer</button>
     </div>
   `;
 
-  barFill.style.width = "100%";
+  document.getElementById("bar").style.width = "100%";
 }
+
+function restart(){
+  localStorage.clear();
+  location.reload();
+}
+
+</script>
+
+</body>
+</html>
 
 });
 </script>
