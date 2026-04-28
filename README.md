@@ -23,9 +23,10 @@ body {
   background:#1e293b;
   padding:20px;
   border-radius:20px;
+  text-align:center;
 }
 
-h2 { text-align:center; }
+h2 { margin-top:10px; }
 
 button {
   width:100%;
@@ -39,9 +40,7 @@ button {
   background:#334155;
 }
 
-button:hover {
-  opacity:0.9;
-}
+button:hover { opacity:0.9; }
 
 .red { background:#ef4444; }
 .blue { background:#3b82f6; }
@@ -63,6 +62,11 @@ button:hover {
 
 <div class="container">
 <div class="card">
+
+<!-- LOGO -->
+<img src="https://upload.wikimedia.org/wikipedia/fr/thumb/3/3e/Mission_locale_logo.svg/512px-Mission_locale_logo.svg.png"
+alt="Mission Locale"
+style="width:130px; margin:0 auto 10px; display:block;">
 
 <h2>🎯 Diagnostic rapide</h2>
 
@@ -204,15 +208,15 @@ let secondaires = sorted
 
 let data = {
 
-psad:["🔄","Parcours Remobilisation (PSAD)","Besoin de reprendre un rythme et clarifier ton projet.","Ce dispositif aide à reprendre confiance, construire un projet et se remobiliser progressivement."],
+psad:["🔄","Parcours Remobilisation (PSAD)","Besoin de reprendre un rythme et clarifier ton projet.","Ce dispositif aide à reprendre confiance et construire un projet professionnel."],
 
-emploi:["💼","Accompagnement vers l’emploi","Tu es prêt à accéder à un emploi ou une formation.","La Mission Locale t’aide dans ta recherche d’emploi, CV, entretiens et accès à la formation."],
+emploi:["💼","Accompagnement vers l’emploi","Tu es prêt à travailler ou te former.","Aide à la recherche d’emploi, CV, entretiens et formation."],
 
-difficulte:["🧠","Accompagnement renforcé (TAPAJ / BIP)","Tu fais face à des difficultés importantes.","Accompagnement global avec soutien social, santé et reprise progressive d’activité."],
+difficulte:["🧠","Accompagnement renforcé (TAPAJ / BIP)","Tu fais face à des difficultés importantes.","Soutien global : social, santé, insertion progressive."],
 
-logement:["🏠","Jeunes et Logés","Ta situation de logement est instable.","Aide à trouver un logement et solutions temporaires avec accompagnement."],
+logement:["🏠","Jeunes et Logés","Situation de logement instable.","Aide à trouver un logement et solutions d’urgence."],
 
-argent:["💰","Aides financières (FAJ / aides jeunes)","Tu as besoin d’un soutien financier.","Aides ponctuelles pour répondre à des besoins urgents et soutenir ton insertion."]
+argent:["💰","Aides financières (FAJ)","Besoin d’un soutien financier.","Aides ponctuelles pour besoins urgents."]
 };
 
 let html = "<h3>🎯 Ton orientation</h3>";
@@ -221,7 +225,7 @@ let p = data[principal];
 
 html += `
 <div class="result-box">
-<h4>👉 Priorité : ${p[0]} ${p[1]}</h4>
+<h4>👉 ${p[0]} ${p[1]}</h4>
 <p><b>Besoin :</b> ${p[2]}</p>
 <p>${p[3]}</p>
 </div>
