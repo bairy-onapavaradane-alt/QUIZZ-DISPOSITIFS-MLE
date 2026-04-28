@@ -63,10 +63,8 @@ button:hover { opacity:0.9; }
 <div class="container">
 <div class="card">
 
-<!-- LOGO -->
-<img src="https://upload.wikimedia.org/wikipedia/fr/thumb/3/3e/Mission_locale_logo.svg/512px-Mission_locale_logo.svg.png"
-alt="Mission Locale"
-style="width:130px; margin:0 auto 10px; display:block;">
+<!-- LOGO LOCAL -->
+<img src="logo.png" alt="Mission Locale" style="width:130px; margin:0 auto 10px; display:block;">
 
 <h2>🎯 Diagnostic rapide</h2>
 
@@ -208,15 +206,15 @@ let secondaires = sorted
 
 let data = {
 
-psad:["🔄","Parcours Remobilisation (PSAD)","Besoin de reprendre un rythme et clarifier ton projet.","Ce dispositif aide à reprendre confiance et construire un projet professionnel."],
+psad:["🔄","Parcours Remobilisation (PSAD)","Besoin de reprendre un rythme.","Aide à retrouver motivation et construire un projet."],
 
-emploi:["💼","Accompagnement vers l’emploi","Tu es prêt à travailler ou te former.","Aide à la recherche d’emploi, CV, entretiens et formation."],
+emploi:["💼","Accompagnement vers l’emploi","Prêt à travailler ou se former.","Aide CV, emploi, formation."],
 
-difficulte:["🧠","Accompagnement renforcé (TAPAJ / BIP)","Tu fais face à des difficultés importantes.","Soutien global : social, santé, insertion progressive."],
+difficulte:["🧠","Accompagnement renforcé (TAPAJ / BIP)","Difficultés importantes.","Soutien social, santé, insertion progressive."],
 
-logement:["🏠","Jeunes et Logés","Situation de logement instable.","Aide à trouver un logement et solutions d’urgence."],
+logement:["🏠","Jeunes et Logés","Logement instable.","Solutions logement et accompagnement."],
 
-argent:["💰","Aides financières (FAJ)","Besoin d’un soutien financier.","Aides ponctuelles pour besoins urgents."]
+argent:["💰","Aides financières (FAJ)","Besoin financier urgent.","Aides ponctuelles."]
 };
 
 let html = "<h3>🎯 Ton orientation</h3>";
@@ -225,7 +223,7 @@ let p = data[principal];
 
 html += `
 <div class="result-box">
-<h4>👉 ${p[0]} ${p[1]}</h4>
+<h4>${p[0]} ${p[1]}</h4>
 <p><b>Besoin :</b> ${p[2]}</p>
 <p>${p[3]}</p>
 </div>
@@ -251,6 +249,12 @@ html += `<button class="start" onclick="location.reload()">Recommencer</button>`
 document.getElementById("quiz").style.display="none";
 document.getElementById("result").innerHTML = html;
 
+}
+
+</script>
+
+</body>
+</html>
 }
 
 </script>
