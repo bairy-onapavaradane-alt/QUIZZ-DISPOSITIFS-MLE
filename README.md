@@ -36,12 +36,19 @@ button {
   font-size:16px;
   cursor:pointer;
   color:white;
+  background:#334155; /* 👈 CORRECTION visibilité */
 }
 
+button:hover {
+  opacity:0.9;
+}
+
+/* couleurs réponses */
 .red { background:#ef4444; }
 .blue { background:#3b82f6; }
 .green { background:#22c55e; }
 .yellow { background:#eab308; color:black; }
+
 .start { background:#22c55e; }
 
 .result-box {
@@ -82,55 +89,55 @@ const quiz = [
 {
 q:"Quelle est ta situation actuelle ?",
 a:[
-{t:"Aucune activité (ni école, ni emploi)", type:"psad", w:3},
-{t:"Je cherche un emploi ou une formation", type:"emploi", w:2},
-{t:"Situation très difficile (isolement, santé…)", type:"difficulte", w:4}
+{t:"Aucune activité (ni école, ni emploi)", type:"psad", w:3, c:"red"},
+{t:"Je cherche un emploi ou une formation", type:"emploi", w:2, c:"blue"},
+{t:"Situation difficile (isolement, santé…)", type:"difficulte", w:4, c:"green"}
 ]
 },
 
 {
 q:"Ton projet professionnel :",
 a:[
-{t:"Clair", type:"emploi", w:3},
-{t:"En réflexion", type:"psad", w:2},
-{t:"Aucun", type:"psad", w:3}
+{t:"Clair", type:"emploi", w:3, c:"blue"},
+{t:"En réflexion", type:"psad", w:2, c:"red"},
+{t:"Aucun", type:"psad", w:3, c:"red"}
 ]
 },
 
 {
 q:"Ton logement :",
 a:[
-{t:"Stable", type:"none", w:0},
-{t:"Précaire", type:"logement", w:3},
-{t:"Sans logement", type:"logement", w:5}
+{t:"Stable", type:"none", w:0, c:"green"},
+{t:"Précaire", type:"logement", w:3, c:"yellow"},
+{t:"Sans logement", type:"logement", w:5, c:"yellow"}
 ]
 },
 
 {
 q:"Ta situation financière :",
 a:[
-{t:"Très difficile", type:"argent", w:4},
-{t:"Un peu difficile", type:"argent", w:2},
-{t:"Stable", type:"none", w:0}
+{t:"Très difficile", type:"argent", w:4, c:"yellow"},
+{t:"Un peu difficile", type:"argent", w:2, c:"yellow"},
+{t:"Stable", type:"none", w:0, c:"green"}
 ]
 },
 
 {
 q:"Accompagnement actuel :",
 a:[
-{t:"Oui suffisant", type:"none", w:0},
-{t:"Oui mais insuffisant", type:"psad", w:2},
-{t:"Aucun", type:"psad", w:3}
+{t:"Oui suffisant", type:"none", w:0, c:"green"},
+{t:"Oui mais insuffisant", type:"psad", w:2, c:"red"},
+{t:"Aucun", type:"psad", w:3, c:"red"}
 ]
 },
 
 {
 q:"Ta priorité aujourd’hui :",
 a:[
-{t:"Travailler", type:"emploi", w:4},
-{t:"Stabiliser ma vie", type:"difficulte", w:5},
-{t:"Trouver un logement", type:"logement", w:5},
-{t:"Avoir de l’argent", type:"argent", w:5}
+{t:"Travailler", type:"emploi", w:4, c:"blue"},
+{t:"Stabiliser ma vie", type:"difficulte", w:5, c:"green"},
+{t:"Trouver un logement", type:"logement", w:5, c:"yellow"},
+{t:"Avoir de l’argent", type:"argent", w:5, c:"yellow"}
 ]
 }
 
@@ -168,6 +175,7 @@ answers.innerHTML = "";
 q.a.forEach(rep => {
 let btn = document.createElement("button");
 btn.textContent = rep.t;
+btn.className = rep.c; // 👈 IMPORTANT (couleurs visibles)
 
 btn.onclick = () => {
 if(rep.type !== "none"){
@@ -198,14 +206,13 @@ let secondaires = sorted
 let data = {
 psad:["🔄","Remobilisation","Retrouver un rythme et construire un projet."],
 emploi:["💼","Insertion professionnelle","Accès emploi ou formation."],
-difficulte:["🧠","Accompagnement renforcé","Soutien social, santé, motivation."],
-logement:["🏠","Accès logement","Stabiliser ta situation de logement."],
-argent:["💰","Aides financières","Répondre à une urgence financière."]
+difficulte:["🧠","Accompagnement renforcé","Soutien social et personnel."],
+logement:["🏠","Accès logement","Stabiliser ta situation."],
+argent:["💰","Aides financières","Répondre à une urgence."]
 };
 
 let html = "<h3>🎯 Ton orientation</h3>";
 
-// principal
 let p = data[principal];
 
 html += `
@@ -215,13 +222,11 @@ html += `
 </div>
 `;
 
-// secondaires
 if(secondaires.length){
 html += "<h4>🔎 Ensuite :</h4>";
 
 secondaires.forEach(s=>{
 let d = data[s[0]];
-
 html += `
 <div class="result-box">
 <h4>${d[0]} ${d[1]}</h4>
