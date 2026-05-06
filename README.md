@@ -1,263 +1,234 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Diagnostic Mission Locale</title>
+import React, { useState } from "react";
 
-<style>
-body {
-  margin:0;
-  font-family: Arial;
-  background:#0f172a;
-  color:white;
-}
-
-.container {
-  max-width:420px;
-  margin:auto;
-  padding:20px;
-}
-
-.card {
-  background:#1e293b;
-  padding:20px;
-  border-radius:20px;
-  text-align:center;
-}
-
-h2 { margin-top:10px; }
-
-button {
-  width:100%;
-  padding:14px;
-  margin:8px 0;
-  border:none;
-  border-radius:12px;
-  font-size:16px;
-  cursor:pointer;
-  color:white;
-  background:#334155;
-}
-
-button:hover { opacity:0.9; }
-
-.red { background:#ef4444; }
-.blue { background:#3b82f6; }
-.green { background:#22c55e; }
-.yellow { background:#eab308; color:black; }
-
-.start { background:#22c55e; }
-
-.result-box {
-  background:#334155;
-  padding:15px;
-  border-radius:10px;
-  margin-top:10px;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-<div class="card">
-
-<!-- LOGO LOCAL -->
-<img src="logo.png" alt="Mission Locale" style="width:130px; margin:0 auto 10px; display:block;">
-
-<h2>🎯 Diagnostic rapide</h2>
-
-<div id="start">
-<p>Réponds aux questions pour être orienté</p>
-<button class="start" onclick="startQuiz()">Commencer</button>
-</div>
-
-<div id="quiz" style="display:none;">
-<p id="question"></p>
-<div id="answers"></div>
-</div>
-
-<div id="result"></div>
-
-</div>
-</div>
-
-<script>
-
-const quiz = [
-
-{
-q:"Quelle est ta situation actuelle ?",
-a:[
-{t:"Aucune activité (ni école, ni emploi)", type:"psad", w:3, c:"red"},
-{t:"Je cherche un emploi ou une formation", type:"emploi", w:2, c:"blue"},
-{t:"Situation difficile (isolement, santé…)", type:"difficulte", w:4, c:"green"}
-]
-},
-
-{
-q:"Ton projet professionnel :",
-a:[
-{t:"Clair", type:"emploi", w:3, c:"blue"},
-{t:"En réflexion", type:"psad", w:2, c:"red"},
-{t:"Aucun", type:"psad", w:3, c:"red"}
-]
-},
-
-{
-q:"Ton logement :",
-a:[
-{t:"Stable", type:"none", w:0, c:"green"},
-{t:"Précaire", type:"logement", w:3, c:"yellow"},
-{t:"Sans logement", type:"logement", w:5, c:"yellow"}
-]
-},
-
-{
-q:"Ta situation financière :",
-a:[
-{t:"Très difficile", type:"argent", w:4, c:"yellow"},
-{t:"Un peu difficile", type:"argent", w:2, c:"yellow"},
-{t:"Stable", type:"none", w:0, c:"green"}
-]
-},
-
-{
-q:"Accompagnement actuel :",
-a:[
-{t:"Oui suffisant", type:"none", w:0, c:"green"},
-{t:"Oui mais insuffisant", type:"psad", w:2, c:"red"},
-{t:"Aucun", type:"psad", w:3, c:"red"}
-]
-},
-
-{
-q:"Ta priorité aujourd’hui :",
-a:[
-{t:"Travailler", type:"emploi", w:4, c:"blue"},
-{t:"Stabiliser ma vie", type:"difficulte", w:5, c:"green"},
-{t:"Trouver un logement", type:"logement", w:5, c:"yellow"},
-{t:"Avoir de l’argent", type:"argent", w:5, c:"yellow"}
-]
-}
-
+// ================= CONFIG =================
+const questions = [
+  {
+    name: "logement",
+    label: "Quel est ton logement ?",
+    options: [
+      { value: "", label: "Choisir" },
+      { value: "stable", label: "Stable" },
+      { value: "precaire", label: "Précaire / hébergé" },
+      { value: "sans", label: "Sans logement" }
+    ]
+  },
+  {
+    name: "sante",
+    label: "Ta santé est-elle suivie ?",
+    options: [
+      { value: "", label: "Choisir" },
+      { value: "ok", label: "Oui" },
+      { value: "non", label: "Non" }
+    ]
+  },
+  {
+    name: "mobilite",
+    label: "Peux-tu te déplacer facilement ?",
+    options: [
+      { value: "", label: "Choisir" },
+      { value: "ok", label: "Oui" },
+      { value: "non", label: "Non" }
+    ]
+  },
+  {
+    name: "projet",
+    label: "As-tu un projet professionnel ?",
+    options: [
+      { value: "", label: "Choisir" },
+      { value: "clair", label: "Clair" },
+      { value: "flou", label: "Flou / aucun" }
+    ]
+  },
+  {
+    name: "competences",
+    label: "Note tes compétences (0 à 10)",
+    type: "number"
+  },
+  {
+    name: "finance",
+    label: "Situation financière stable ?",
+    options: [
+      { value: "", label: "Choisir" },
+      { value: "ok", label: "Oui" },
+      { value: "non", label: "Non" }
+    ]
+  }
 ];
 
-let i = 0;
+// ================= LOGIQUE =================
+const calculProfil = (r) => {
+  let score = 0;
 
-let score = {
-psad:0,
-emploi:0,
-difficulte:0,
-logement:0,
-argent:0
+  if (r.logement === "stable") score += 2;
+  if (r.logement === "sans") score -= 1;
+
+  if (r.sante === "ok") score++;
+  if (r.mobilite === "ok") score++;
+  if (r.projet === "clair") score += 2;
+  if (Number(r.competences) >= 7) score += 2;
+  if (r.finance === "ok") score++;
+
+  if (score <= 2) return "fragile";
+  if (score <= 6) return "intermediaire";
+  return "autonome";
 };
 
-function startQuiz(){
-document.getElementById("start").style.display="none";
-document.getElementById("quiz").style.display="block";
-showQuestion();
-}
+const getDispositifs = (profil) => {
+  if (profil === "fragile") {
+    return [
+      "PSAD / Décrochage",
+      "TAPAJ",
+      "BIP",
+      "Aides financières",
+      "Santé / psy",
+      "Logement d'urgence"
+    ];
+  }
 
-function showQuestion(){
+  if (profil === "intermediaire") {
+    return [
+      "Accompagnement vers l'emploi",
+      "Jeunes et logés",
+      "Ateliers CV",
+      "Formation",
+      "Mobilité"
+    ];
+  }
 
-if(i >= quiz.length){
-finishQuiz();
-return;
-}
-
-let q = quiz[i];
-document.getElementById("question").innerText = q.q;
-
-let answers = document.getElementById("answers");
-answers.innerHTML = "";
-
-q.a.forEach(rep => {
-let btn = document.createElement("button");
-btn.textContent = rep.t;
-btn.className = rep.c;
-
-btn.onclick = () => {
-if(rep.type !== "none"){
-score[rep.type] += rep.w;
-}
-i++;
-showQuestion();
+  return [
+    "Emploi direct",
+    "Alternance",
+    "Création d'entreprise",
+    "Logement autonome",
+    "Réseau entreprise"
+  ];
 };
 
-answers.appendChild(btn);
-});
+// ================= APP =================
+export default function App() {
+  const [step, setStep] = useState(0);
+  const [profil, setProfil] = useState(null);
+
+  const [reponses, setReponses] = useState({
+    logement: "",
+    sante: "",
+    mobilite: "",
+    projet: "",
+    competences: "",
+    finance: ""
+  });
+
+  const current = questions[step];
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setReponses({ ...reponses, [name]: value });
+  };
+
+  const next = () => {
+    if (!reponses[current.name]) {
+      alert("Réponds à la question");
+      return;
+    }
+    setStep(step + 1);
+  };
+
+  const prev = () => setStep(step - 1);
+
+  const submit = () => {
+    const result = calculProfil(reponses);
+    setProfil(result);
+  };
+
+  const reset = () => {
+    setProfil(null);
+    setStep(0);
+    setReponses({
+      logement: "",
+      sante: "",
+      mobilite: "",
+      projet: "",
+      competences: "",
+      finance: ""
+    });
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="bg-white p-6 rounded-2xl shadow w-full max-w-md">
+        <h1 className="text-xl font-bold text-center mb-4">
+          Diagnostic Mission Locale
+        </h1>
+
+        {!profil ? (
+          <>
+            <p className="mb-4">{current.label}</p>
+
+            {current.type === "number" ? (
+              <input
+                type="number"
+                name={current.name}
+                value={reponses[current.name]}
+                min="0"
+                max="10"
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+            ) : (
+              <select
+                name={current.name}
+                value={reponses[current.name]}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              >
+                {current.options.map((o, i) => (
+                  <option key={i} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            <div className="flex justify-between mt-6">
+              {step > 0 && (
+                <button onClick={prev} className="px-4 py-2 bg-gray-300 rounded">
+                  Retour
+                </button>
+              )}
+
+              {step < questions.length - 1 ? (
+                <button onClick={next} className="px-4 py-2 bg-blue-500 text-white rounded ml-auto">
+                  Suivant
+                </button>
+              ) : (
+                <button onClick={submit} className="px-4 py-2 bg-green-500 text-white rounded ml-auto">
+                  Résultat
+                </button>
+              )}
+            </div>
+          </>
+        ) : (
+          <div>
+            <h2 className="text-lg font-bold mb-2">
+              Profil : {profil.toUpperCase()}
+            </h2>
+
+            <p className="mb-2">Dispositifs conseillés :</p>
+            <ul className="list-disc pl-5">
+              {getDispositifs(profil).map((d, i) => (
+                <li key={i}>{d}</li>
+              ))}
+            </ul>
+
+            <button
+              onClick={reset}
+              className="mt-6 w-full bg-black text-white py-2 rounded"
+            >
+              Recommencer
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
-
-function finishQuiz(){
-
-let sorted = Object.entries(score).sort((a,b)=>b[1]-a[1]);
-
-let urgence = sorted.find(x =>
-["logement","argent","difficulte"].includes(x[0]) && x[1] >= 4
-);
-
-let principal = urgence ? urgence[0] : sorted[0][0];
-
-let secondaires = sorted
-.filter(x => x[0] !== principal && x[1] > 0)
-.slice(0,2);
-
-let data = {
-
-psad:["🔄","Parcours Remobilisation (PSAD)","Besoin de reprendre un rythme.","Aide à retrouver motivation et construire un projet."],
-
-emploi:["💼","Accompagnement vers l’emploi","Prêt à travailler ou se former.","Aide CV, emploi, formation."],
-
-difficulte:["🧠","Accompagnement renforcé (TAPAJ / BIP)","Difficultés importantes.","Soutien social, santé, insertion progressive."],
-
-logement:["🏠","Jeunes et Logés","Logement instable.","Solutions logement et accompagnement."],
-
-argent:["💰","Aides financières (FAJ)","Besoin financier urgent.","Aides ponctuelles."]
-};
-
-let html = "<h3>🎯 Ton orientation</h3>";
-
-let p = data[principal];
-
-html += `
-<div class="result-box">
-<h4>${p[0]} ${p[1]}</h4>
-<p><b>Besoin :</b> ${p[2]}</p>
-<p>${p[3]}</p>
-</div>
-`;
-
-if(secondaires.length){
-html += "<h4>🔎 Ensuite :</h4>";
-
-secondaires.forEach(s=>{
-let d = data[s[0]];
-html += `
-<div class="result-box">
-<h4>${d[0]} ${d[1]}</h4>
-<p><b>Besoin :</b> ${d[2]}</p>
-<p>${d[3]}</p>
-</div>
-`;
-});
-}
-
-html += `<button class="start" onclick="location.reload()">Recommencer</button>`;
-
-document.getElementById("quiz").style.display="none";
-document.getElementById("result").innerHTML = html;
-
-}
-
-</script>
-
-</body>
-</html>
-}
-
-</script>
-
-</body>
-</html>
